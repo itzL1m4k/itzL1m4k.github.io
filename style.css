@@ -1,6 +1,6 @@
 body {
 	font-family: Arial, sans-serif;
-	background-color: #f8f8f8;
+	background-color: #454545;
 	margin: 0;
 	padding: 0;
 	display: flex;
@@ -31,5 +31,5 @@ p {
 
 .red {
 	color: red;
-	font-weight: bold;
+	font-weight: bolder;
 }

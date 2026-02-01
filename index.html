@@ -1,22 +1,104 @@
+```html
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
-  <title>Liczba Pi</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pi Challenge</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f0f0f0; text-align: center; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        button { padding: 10px 20px; margin: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        #pi-display { font-size: 24px; margin: 20px 0; }
+        #input { padding: 10px; width: 300px; font-size: 18px; }
+        #score { font-size: 20px; color: green; }
+        #error { color: red; }
+        .mode { display: none; }
+        .active { display: block; }
+    </style>
 </head>
-
 <body>
-  <p>Wpisuj kolejne cyfry liczby PI:</p>
-  <p id="displayedPi">3.</p>
-  <br /><input type="text" id="userInput" maxlength="1" autofocus />
-  <p id="message"></p>
-  <p id="score">Twój wynik: 0</p>
+    <div class="container">
+        <h1>Pi Challenge</h1>
+        <button id="test-mode">Tryb Testu</button>
+        <button id="learn-mode">Tryb Nauki</button>
+        
+        <div id="test" class="mode">
+            <p>Wpisz cyfry π po przecinku:</p>
+            <input type="text" id="input" maxlength="1" autofocus>
+            <div id="pi-display">3.</div>
+            <div id="score">Wynik: 0</div>
+            <div id="error"></div>
+        </div>
+        
+        <div id="learn" class="mode">
+            <p>Naucz się cyfr π:</p>
+            <div id="learn-display">3.1415926535 8979323846 2643383279 5028841971 6939937510</div>
+            <button id="show-more">Pokaż więcej</button>
+            <button id="hide">Ukryj</button>
+        </div>
+    </div>
 
-  <script src="jquery-3.7.1.min.js"></script>
-  <script src="app.js"></script>
+    <script>
+        const piDigits = '14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196442881097566593344612847564823378678316527120190914564856692346034861045432664821339360726024914127372458700660631558817488152092096282925409171536436789259036001133053054882046652138414695194151160943305727036575959195309218611738193261179310511854807446237996274956735188575272489122793818301194912';
+        let currentIndex = 0;
+        let score = 0;
+        let learnIndex = 50;
+
+        $('#test-mode').click(function() {
+            $('.mode').removeClass('active');
+            $('#test').addClass('active');
+            resetTest();
+        });
+
+        $('#learn-mode').click(function() {
+            $('.mode').removeClass('active');
+            $('#learn').addClass('active');
+            showLearn();
+        });
+
+        function resetTest() {
+            currentIndex = 0;
+            score = 0;
+            $('#pi-display').html('3.');
+            $('#score').html('Wynik: 0');
+            $('#error').html('');
+            $('#input').val('').focus();
+        }
+
+        $('#input').on('input', function() {
+            let digit = $(this).val();
+            if (digit === piDigits[currentIndex]) {
+                $('#pi-display').append(digit);
+                currentIndex++;
+                score++;
+                $('#score').html('Wynik: ' + score);
+            } else {
+                $('#error').html('Błąd! Poprawna cyfra: ' + piDigits[currentIndex]);
+                setTimeout(resetTest, 2000);
+            }
+            $(this).val('');
+        });
+
+        function showLearn() {
+            let display = '3.' + piDigits.substring(0, learnIndex).match(/.{1,10}/g).join(' ');
+            $('#learn-display').html(display);
+        }
+
+        $('#show-more').click(function() {
+            learnIndex += 50;
+            showLearn();
+        });
+
+        $('#hide').click(function() {
+            $('#learn-display').html('Ukryte. Spróbuj zapamiętać!');
+        });
+
+        // Domyślny tryb
+        $('#test-mode').click();
+    </script>
 </body>
-
 </html>
+```

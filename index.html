@@ -6,9 +6,7 @@
     <title>Pi Challenge</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
         body {
             font-family: system-ui, sans-serif;
             background: #f4f4f9;
@@ -27,17 +25,8 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             padding: 24px;
         }
-        h1 {
-            margin: 0 0 1.2rem;
-            font-size: clamp(1.8rem, 5vw, 2.4rem);
-        }
-        .buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-        }
+        h1 { margin: 0 0 1.2rem; font-size: clamp(1.8rem, 5vw, 2.4rem); }
+        .buttons { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 1.5rem; }
         button {
             padding: 10px 24px;
             font-size: 1rem;
@@ -50,12 +39,8 @@
         }
         button:hover { background: #0055aa; }
         button:active { transform: translateY(1px); }
-        .mode {
-            display: none;
-        }
-        .active {
-            display: block;
-        }
+        .mode { display: none; }
+        .active { display: block; }
         #pi-display {
             font-family: monospace;
             font-size: clamp(1.1rem, 4vw, 1.4rem);
@@ -65,7 +50,6 @@
             border-radius: 8px;
             margin: 1rem 0;
             word-break: break-all;
-            hyphens: auto;
         }
         #input {
             width: 100%;
@@ -84,22 +68,13 @@
             font-size: 1.2rem;
         }
         #score, #best-score { color: #2e7d32; }
-        #error { color: #d32f2f; }
-        #learn-display {
-            font-family: monospace;
-            white-space: pre-wrap;
-            font-size: clamp(1rem, 3.5vw, 1.25rem);
-            line-height: 1.6;
-            background: #f9f9f9;
-            padding: 16px;
-            border-radius: 8px;
-            margin: 1rem 0;
+        #error { color: #d32f2f; font-weight: bold; }
+        #reset-btn {
+            background: #c62828;
+            margin-top: 12px;
+            display: none;
         }
-        @media (max-width: 480px) {
-            .container { padding: 16px; }
-            button { padding: 10px 20px; font-size: 0.95rem; }
-            #input { font-size: 1.4rem; max-width: 100px; }
-        }
+        #reset-btn:hover { background: #b71c1c; }
     </style>
 </head>
 <body>
@@ -109,6 +84,7 @@
         <button id="test-mode">Tryb Testu</button>
         <button id="learn-mode">Tryb Nauki</button>
     </div>
+
     <div id="test" class="mode">
         <p>Wpisz kolejne cyfry π po przecinku:</p>
         <input type="text" id="input" maxlength="1" autofocus autocomplete="off">
@@ -117,7 +93,9 @@
         <div id="best-score">Najlepszy wynik: 0</div>
         <div id="last-attempts">Ostatnie próby: </div>
         <div id="error"></div>
+        <button id="reset-btn">Reset</button>
     </div>
+
     <div id="learn" class="mode">
         <p>Naucz się cyfr π:</p>
         <div id="learn-display">3.1415926535 8979323846 2643383279 5028841971 6939937510</div>
@@ -127,19 +105,21 @@
         </div>
     </div>
 </div>
+
 <script>
 const piDigits = '14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196442881097566593344612847564823378678316527120190914564856692346034861045432664821339360726024914127372458700660631558817488152092096282925409171536436789259036001133053054882046652138414695194151160943305727036575959195309218611738193261179310511854807446237996274956735188575272489122793818301194912';
+
 let currentIndex = 0;
 let score = 0;
 let learnIndex = 50;
 let bestScore = localStorage.getItem('piBestScore') || 0;
 let lastAttempts = JSON.parse(localStorage.getItem('piLastAttempts')) || [];
+let gameOver = false;
 
 function updateScores() {
     $('#best-score').html('Najlepszy wynik: ' + bestScore);
     $('#last-attempts').html('Ostatnie próby: ' + lastAttempts.join(', '));
 }
-
 updateScores();
 
 $('#test-mode').click(function() {
@@ -147,30 +127,41 @@ $('#test-mode').click(function() {
     $('#test').addClass('active');
     resetTest();
 });
+
 $('#learn-mode').click(function() {
     $('.mode').removeClass('active');
     $('#learn').addClass('active');
     showLearn();
 });
+
 function resetTest() {
     currentIndex = 0;
     score = 0;
+    gameOver = false;
     $('#pi-display').html('3.');
     $('#score').html('Wynik: 0');
     $('#error').html('');
-    $('#input').val('').focus();
+    $('#reset-btn').hide();
+    $('#input').prop('disabled', false).val('').focus();
     updateScores();
 }
+
 $('#input').on('input', function() {
+    if (gameOver) return;
     let digit = $(this).val();
     if (!/[0-9]/.test(digit)) { $(this).val(''); return; }
+
     if (digit === piDigits[currentIndex]) {
         $('#pi-display').append(digit);
         currentIndex++;
         score++;
         $('#score').html('Wynik: ' + score);
     } else {
+        gameOver = true;
         $('#error').html('Błąd! Kolejne cyfry: ' + piDigits.substring(currentIndex, currentIndex + 10));
+        $('#input').prop('disabled', true);
+        $('#reset-btn').show();
+
         if (score > bestScore) {
             bestScore = score;
             localStorage.setItem('piBestScore', bestScore);
@@ -181,23 +172,28 @@ $('#input').on('input', function() {
             localStorage.setItem('piLastAttempts', JSON.stringify(lastAttempts));
         }
         updateScores();
-        setTimeout(resetTest, 1800);
     }
     $(this).val('');
 });
+
+$('#reset-btn').click(resetTest);
+
 function showLearn() {
     let display = '3.' + piDigits.substring(0, learnIndex)
         .match(/.{1,10}/g)
         .join(' ');
     $('#learn-display').html(display);
 }
+
 $('#show-more').click(function() {
     learnIndex += 50;
     showLearn();
 });
+
 $('#hide').click(function() {
     $('#learn-display').html('Ukryte. Spróbuj zapamiętać!');
 });
+
 $('#test-mode').click();
 </script>
 </body>
